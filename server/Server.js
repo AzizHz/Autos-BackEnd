@@ -18,6 +18,9 @@ app.use(cors());
 //mongodb connection
 connectDB();
 
+//Midelwares
+app.use("/images", express.static('images'));
+
 //parse request to body-parser
 app.use(bodyparser.urlencoded({ extended: false }))
 app.use(bodyparser.json())

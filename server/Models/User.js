@@ -29,6 +29,9 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    image: {
+        type: String
+    },
     Posts: [
         {
             type: mongoose.Schema.Types.ObjectId,

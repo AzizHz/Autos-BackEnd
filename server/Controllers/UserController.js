@@ -5,7 +5,10 @@ const jwt = require('jsonwebtoken');
 const Client = require('../Models/User');
 const nodemailer = require('nodemailer');
 
+
 exports.Register = async function (req, res) {
+    console.log(req.file)
+
     try {
         //checking if email already in use
         const emailExist = await Client.findOne({
@@ -214,25 +217,26 @@ exports.find = (req, res) => {
 
 
 exports.update = (req, res) => {
-    if (!req.body) {
-        return res
-            .status(400)
-            .send({ message: "Data to update can not be empty" })
-    }
 
-    const id = req.params.id;
-    Client.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
-        .then(data => {
-            if (!data) {
-                res.status(404).send({ message: `Cannot Update client with ${id}. Maybe client not found!` })
-            } else {
-                res.send(data)
-            }
-        })
-        .catch(err => {
-            res.status(500).send({ message: "Error Update client information" })
-        })
-}
+
+    console.log(req.file)
+
+
+
+    Client.findByIdAndUpdate(
+        { _id: req.params.id },
+        {
+            ...req.body,
+            image: req.file.filename,
+
+        },
+
+
+        //{ ...req.body, _id: req.params.id }
+    )
+        .then((data) => res.status(200).json(data))
+        .catch((error) => res.status(400).json({ error }));
+};
 
 
 
