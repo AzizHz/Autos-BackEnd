@@ -33,13 +33,7 @@ exports.Register = async function (req, res) {
         });
 
         const savedclient = await client.save();
-        const Act = await SendingCode(client.Email);
-        res.status(200).json({
-            client: savedclient,
-            act: Act,
-            status: true,
-            message: 'You successfully created an account',
-        });
+        res.status(200).json(savedclient);
         console.log(savedclient);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -47,7 +41,6 @@ exports.Register = async function (req, res) {
 };
 
 exports.Login = async function (req, res) {
-    console.log(req.body.Password);
     try {
         //checking username
         const ClientExist = await Client.findOne({
@@ -70,9 +63,7 @@ exports.Login = async function (req, res) {
                 status: false,
             });
 
-        if (ClientExist.AccountState == false) {
-            return res.status(401).send('Verify Account');
-        }
+
 
         //Creating and assigning token
         const token = jwt.sign(
@@ -84,11 +75,7 @@ exports.Login = async function (req, res) {
                 expiresIn: '30d',
             }
         );
-        res.status(200).json({
-            message: 'you are logged in',
-            Client: ClientExist,
-            token,
-        });
+        res.status(200).json(ClientExist);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
