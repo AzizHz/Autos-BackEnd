@@ -54,6 +54,7 @@ exports.create = async (req, res) => {
         const newPost = new Post({
             Title: req.body.Title,
             Description: req.body.Description,
+            image:req.body.image,
             User: req.body.User,
         })
         const savedPost = await newPost.save();

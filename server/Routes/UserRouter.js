@@ -11,5 +11,7 @@ router.get('/', UserController.find);
 router.get('/:id', UserController.findOne);
 router.patch('/update/:id', upload, UserController.update);
 router.delete('/delete/:id', UserController.delete);
+router.get('/verify/:token',UserController.Verify)
+
 
 module.exports = router;

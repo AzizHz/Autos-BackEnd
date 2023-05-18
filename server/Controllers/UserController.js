@@ -33,6 +33,7 @@ exports.Register = async function (req, res) {
         });
 
         const savedclient = await client.save();
+        await SendingCode(savedclient)
         res.status(200).json(savedclient);
         console.log(savedclient);
     } catch (error) {
@@ -49,6 +50,12 @@ exports.Login = async function (req, res) {
         if (!ClientExist)
             return res.status(404).json({
                 message: 'Client not found',
+                status: false,
+            });
+
+        if (ClientExist.AccountState == false)
+            return res.status(404).json({
+                message: 'verify your account please',
                 status: false,
             });
 
@@ -81,9 +88,11 @@ exports.Login = async function (req, res) {
     }
 };
 
-const SendingCode = async function (email) {
+const SendingCode = async function (user) {
 
-    const ActivationNumber = Math.floor(100000 + Math.random() * 999999);
+    const token = jwt.sign({ userId: user._id }, process.env.TOKEN_SECRET, { expiresIn: '1d' });
+
+    // const ActivationNumber = Math.floor(100000 + Math.random() * 999999);
     var smtpTransport = nodemailer.createTransport({
         host: 'smtp-mail.outlook.com',
         secureConnection: false, // TLS requires secureConnection to be false
@@ -98,10 +107,10 @@ const SendingCode = async function (email) {
     // setup e-mail data, even with unicode symbols
     var mailOptions = {
         from: ' "Aziz Hzami "' + 'ahmedaziz-hz@outlook.com', // sender address (who sends)
-        to: email, // list of receivers (who receives)
-        subject: 'Verification Number', // Subject line
+        to: user.Email, // list of receivers (who receives)
+        subject: 'Email Verification', // Subject line
         text: 'Verify your Account', // plaintext body
-        html: 'Confirmation Code: ' + ActivationNumber, // html body
+        html: `Click <a href="https://autos-backend.onrender.com/User/verify/${token}">here</a> to verify your email address.`, // html body
     };
 
     // send mail with defined transport object
@@ -112,8 +121,6 @@ const SendingCode = async function (email) {
 
         console.log('Message sent: ' + info.response);
     });
-
-    return ActivationNumber;
 };
 exports.ResendCode = async function (req, res) {
     try {
@@ -177,6 +184,31 @@ exports.VerifyAccount = async function (req, res) {
     }
 };
 
+
+exports.Verify = async (req, res) => {
+    const token = req.params.token;
+
+    try {
+        // Verify the token and update the user's email verification status
+        const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+        const user = await Client.findById(decoded.userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        user.AccountState = true;
+        await user.save();
+        res.status(200).json({ message: 'account activated ' });
+
+        // Redirect the user to a success page
+
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({ error: 'Invalid token' });
+    }
+};
+
 exports.findOne = async (req, res, next) => {
     try {
         const id = req.params.id;
@@ -210,17 +242,16 @@ exports.update = (req, res) => {
 
 
 
-    Client.findByIdAndUpdate(
-        { _id: req.params.id },
-        {
-            ...req.body,
-            image: req.file.filename,
-
-        },
-
-
-        //{ ...req.body, _id: req.params.id }
-    )
+    Client.findByIdAndUpdate({ _id: req.params.id }, {
+        FullName: req.body.FullName,
+        Email: req.body.Email,
+        Phone: req.body.Phone,
+        DateOfBirth: req.body.DateOfBirth,
+        Country: req.body.Country,
+        State: req.body.State,
+        HomeAddress: req.body.HomeAddress,
+        image: req.body.image
+    }, { new: true })
         .then((data) => res.status(200).json(data))
         .catch((error) => res.status(400).json({ error }));
 };
