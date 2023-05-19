@@ -29,6 +29,7 @@ exports.Register = async function (req, res) {
             DateOfBirth: req.body.DateOfBirth,
             Country: req.body.Country,
             State: req.body.State,
+            image: "",
             HomeAddress: req.body.HomeAddress,
         });
 
