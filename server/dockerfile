@@ -1,0 +1,7 @@
+FROM node:latest
+LABEL mantainer="COTE SERVEURE <cote.serveur@esprit.tn>"
+WORKDIR /app
+COPY package*.json .
+RUN npm ci --production
+COPY . .
+CMD ["npm","start"]
